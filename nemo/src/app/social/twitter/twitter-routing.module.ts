@@ -8,8 +8,8 @@ import { TwitterComponent } from './twitter.component';
 
 const routes: Routes = [
   {
-    path: 'twitter',
-    component: TwitterComponent, // tiene sus cosas y ... un router-oulet para sus hijos
+    path: '',
+    component: TwitterComponent,
     children: [ // rutas hijas, se verán dentro del router-oulet componente contenedor
       {
         path: 'post', // la ruta real es social/twitter/post

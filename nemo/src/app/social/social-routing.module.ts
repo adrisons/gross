@@ -3,7 +3,6 @@ import { RouterModule, Routes } from '@angular/router';
 import { NgModule } from '@angular/core';
 import { SocialComponent } from './social.component';
 import { TestComponent } from './test/test.component';
-import { TwitterComponent } from './twitter/twitter.component';
 
 const routes: Routes = [
   {
@@ -12,7 +11,7 @@ const routes: Routes = [
     children: [ // rutas hijas, se verán dentro del router-oulet componente contenedor
       {
         path: 'twitter', // la ruta real es social/twitter
-        component: TwitterComponent
+        loadChildren: './twitter/twitter.module#TwitterModule'
       },
        {
         path: 'test', // la ruta real es social/twitter
@@ -20,10 +19,6 @@ const routes: Routes = [
       }
     ]
   }
-  // {
-  //   path: 'movimientos/:id', // parámetro variable id
-  //   component: EditorComponent // se verá dentro del router-oulet principal
-  // }
 ];
 
 /**
@@ -32,7 +27,6 @@ const routes: Routes = [
  * Para no hacerlo dos veces, se exportan ya sus importaciones locales
  */
 export const routableComponents = [
-  TwitterComponent,
   TestComponent,
   SocialComponent
 ];

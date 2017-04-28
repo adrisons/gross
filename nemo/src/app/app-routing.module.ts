@@ -1,19 +1,18 @@
 import { RouterModule, Routes } from '@angular/router';
 
+import { AppComponent } from './app.component';
 import { NgModule } from '@angular/core';
-import { SocialComponent } from './social/social.component';
 
+// Array con las rutas de este módulo
 const routes: Routes = [
-   {
-    path: '',
-    children: [ // rutas hijas, se verán dentro del router-oulet componente contenedor
-      {
-        path: 'social', // la ruta real es social/twitter
-        component: SocialComponent
-      }
-    ]
+
+  {
+    path: '**', // para casos not-found
+    redirectTo: '',
+    pathMatch: 'full'
   }
 ];
+
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
