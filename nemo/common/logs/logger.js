@@ -1,3 +1,6 @@
+// Logs on finish event
+// ====================
+
 module.exports = function(request, response, next) {
     var start = +new Date();
     var stream = process.stdout;
@@ -11,6 +14,7 @@ module.exports = function(request, response, next) {
             '\ntook ' + duration + ' milliseconds \n\n';
 
         stream.write(message);
+
     });
 
     next();
