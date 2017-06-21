@@ -1,11 +1,19 @@
 // Server main file
 // ================
+'use strict';
 
 var express = require('express');
 var app = express();
+var mongoose = require('mongoose');
+var Message = require("./api/models/message");
 var bodyParser = require('body-parser');
 var events = require('events');
 var serverEvents = new events.EventEmitter();
+
+// BBDD
+// ======================
+mongoose.Promise = global.Promise;
+mongoose.connect("mongodb://localhost/Messages");
 
 // export the serverEvents object so others can use it
 exports.serverEvents = serverEvents;
@@ -19,8 +27,8 @@ app.use(logger);
 // ====================
 const PORT = process.env.PORT || 3000;
 // Necesario para la recuperación de parámetros de un post
-app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 // Static resources
 // ================
@@ -28,8 +36,8 @@ app.use(express.static('public'));
 
 // Routing
 // =======
-var messages = require('./routes/messages');
-app.use('/', messages);
+var routes = require('./api/routes/routes');
+app.use('/', routes);
 
 
 // Run server
