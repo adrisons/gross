@@ -35,24 +35,24 @@ serverEvents.on('connector', function() {
 
 // Listen to mentions and emit them through the socket
 var listenTwitter = function() {
-
     twitter.stream('statuses/filter', { track: constants.twitterTokens.USER_NAME }, function(stream) {
         stream.on('data', function(data) {
             socket.emit('mention', converter.twitterToMention(data));
         });
 
         stream.on('error', function(error) {
-            throw error;
+            console.log('Error: ' + error);
         });
     });
+
 }
 
 // Post a reply to a tweet
-var postReply = function(id, userScreenName, text) {
+var postReply = function(id, login, text) {
 
     return new Promise(function(resolve, reject) {
         twitter.post('statuses/update', {
-                status: "@" + userScreenName + " " + text,
+                status: "@" + login + " " + text,
                 in_reply_to_status_id: id
             },
             function(error, tweet, response) {

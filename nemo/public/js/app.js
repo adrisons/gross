@@ -15,19 +15,22 @@ function mainController($scope) {
     });
 
     $scope.openUser = function(mention) {
-        window.open(mention.userUrl);
+        window.open(mention.user.url);
     }
 
     $scope.deployAnswerArea = function(mention) {
         mention.answerAreaDeployed = true;
     }
 
-    $scope.sendReply = function(mention) {
+    $scope.sendReply = function(mention, reply) {
+
+        console.log("FRONT MENTION:\n");
+        console.log(JSON.stringify(mention));
 
         var params = JSON.stringify({
             id: mention.id,
-            replyText: mention.reply,
-            repliedUserScreenName: mention.userScreenName,
+            text: reply,
+            login: mention.user.login,
             social: 'twitter'
         });
 
@@ -44,4 +47,12 @@ function mainController($scope) {
 
         mention.answerAreaDeployed = false;
     }
+
+    // $scope.sendReply = function(mention, reply) {
+    //     $http.post("/reply", { mention: mention, reply: reply }).success(function(data, status, headers, config) {
+    //         console.log("Enviado");
+    //     }).error(function(data, status, headers, config) {
+    //         console.log("Error");
+    //     });
+    // }
 }

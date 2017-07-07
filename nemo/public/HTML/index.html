@@ -17,11 +17,11 @@
 
     <div ng-show="mentions.length > 0" class="mention" ng-repeat="mention in mentions">
         <div class="userAvatar">
-            <img class="avatarImage" ng-click="openUser(mention)" src="{{mention.userAvatar}}"></img>
+            <img class="avatarImage" ng-click="openUser(mention)" src="{{mention.user.avatar}}"></img>
         </div>
         <div class="userInfo">
-            <label class="name">{{mention.userName}}</label>
-            <label class="screenName">{{mention.userScreenName}}</label>
+            <label class="name">{{mention.user.name}}</label>
+            <label class="screenName">{{mention.user.login}}</label>
         </div>
         <div class="date">
             <label>{{mention.date}}</label>
@@ -31,8 +31,8 @@
             <a href="" class="replyLink" ng-click="deployAnswerArea(mention)" ng-show="!mention.answerAreaDeployed">Responder</a>
         </div>
         <div class="answerArea" ng-show="mention.answerAreaDeployed">
-            <textarea class="answerAreaTextarea" ng-model="mention.reply"></textarea>
-            <button class="send" ng-click="sendReply(mention)">Enviar</button>
+            <textarea class="answerAreaTextarea" ng-model="reply"></textarea>
+            <button class="send" ng-click="sendReply(mention, reply)">Enviar</button>
         </div>
     </div>
 

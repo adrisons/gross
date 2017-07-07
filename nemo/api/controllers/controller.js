@@ -15,8 +15,10 @@ exports.init = function(req, res) {
 };
 
 exports.reply = function(req, res) {
+    console.log("reply!");
     if (req.body.social === 'twitter') {
-        twitterConnector.postReply(req.body.id, req.body.repliedUserScreenName, req.body.replyText).then(function(data) {
+        console.log("twitter object:\n" + JSON.stringify(req.body));
+        twitterConnector.postReply(req.body.id, req.body.login, req.body.text).then(function(data) {
             console.log(data);
         });
     }

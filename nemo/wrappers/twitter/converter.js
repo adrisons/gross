@@ -10,12 +10,18 @@ var twitterToMention = function(twitterMention) {
         id: twitterMention.id_str,
         date: twitterMention.created_at,
         text: twitterMention.text,
-        userName: twitterMention.user.name,
-        userScreenName: twitterMention.user.screen_name,
-        userAvatar: twitterMention.user.profile_image_url,
-        userUrl: "http://www.twitter.com/" + twitterMention.user.screen_name
+        user: {
+            name: twitterMention.user.name,
+            login: twitterMention.user.screen_name,
+            avatar: twitterMention.user.profile_image_url,
+            url: "http://www.twitter.com/" + twitterMention.user.screen_name,
+            followers: twitterMention.user.followers_count
+        },
+        retweet_count: twitterMention.retweet_count,
+        favorite_count: twitterMention.favorite_count,
+        // Nullable. If the represented Tweet is a reply, this field will contain the string representation of the original Tweet’s ID
+        replied_id: twitterMention.in_reply_to_status_id_str
     }
-
     return mention;
 }
 

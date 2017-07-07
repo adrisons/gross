@@ -39,6 +39,10 @@ app.use(express.static('public'));
 var routes = require('./api/routes/routes');
 app.use('/', routes);
 
+// To redirect and respond whenever a wrong route is requested
+app.use(function(req, res) {
+    res.status(404).send({ url: req.originalUrl + ' not found' })
+});
 
 // Run server
 // ==========
