@@ -30,7 +30,9 @@ function mainController($scope) {
         var params = JSON.stringify({
             id: mention.id,
             text: reply,
-            login: mention.user.login,
+            user: {
+                login: mention.user.login
+            },
             social: 'twitter'
         });
 
