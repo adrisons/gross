@@ -25,8 +25,26 @@ var twitterToMention = function(twitterMention) {
     return mention;
 }
 
+// Converts a general message into a twitter one
+// =============================================
+var mentionToTwitter = function(mention) {
+    var twitterMention = {
+        id_str: mention.id,
+        created_at: mention.date,
+        text: mention.text,
+        user: {
+            name: mention.user.name,
+            screen_name: mention.user.login,
+            profile_image_url: mention.user.avatar
+        },
+        // Nullable. If the represented Tweet is a reply, this field will contain the string representation of the original Tweet’s ID
+        in_reply_to_status_id_str: mention.replied_id
+    }
+    return twitterMention;
+}
+
 
 // Exports
 // =======
 exports.twitterToMention = twitterToMention;
-// exports.mentionToTwitter = mentionToTwitter;
+exports.mentionToTwitter = mentionToTwitter;
