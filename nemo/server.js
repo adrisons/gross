@@ -4,7 +4,7 @@
 
 var express = require('express');
 var app = express();
-var mongoose = require('mongoose');
+// var mongoose = require('mongoose');
 var Message = require("./api/models/message");
 var bodyParser = require('body-parser');
 var events = require('events');
@@ -12,8 +12,8 @@ var serverEvents = new events.EventEmitter();
 
 // BBDD
 // ======================
-mongoose.Promise = global.Promise;
-mongoose.connect("mongodb://localhost/Messages");
+// mongoose.Promise = global.Promise;
+// mongoose.connect("mongodb://localhost/Messages");
 
 // export the serverEvents object so others can use it
 exports.serverEvents = serverEvents;

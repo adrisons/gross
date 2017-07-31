@@ -27,14 +27,14 @@ serverEvents.on('socket', function(_socket) {
 
 // Starts the listening for mentions
 serverEvents.on('connector', function() {
-    listenTwitter();
+    listen();
 });
 
 // Private functions
 // ===================================================
 
 // Listen to mentions and emit them through the socket
-var listenTwitter = function() {
+var listen = function() {
     twitter.stream('statuses/filter', { track: constants.twitterTokens.USER_NAME }, function(stream) {
         stream.on('data', function(data) {
             socket.emit('mention', converter.twitterToMention(data));
@@ -48,7 +48,7 @@ var listenTwitter = function() {
 }
 
 // Post a reply to a tweet
-var postReply = function(id, login, text) {
+var reply = function(id, login, text) {
 
     return new Promise(function(resolve, reject) {
         twitter.post('statuses/update', {
@@ -69,4 +69,4 @@ var postReply = function(id, login, text) {
 
 // Exported functions
 // ==================
-exports.postReply = postReply;
+exports.reply = reply;
