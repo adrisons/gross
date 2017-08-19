@@ -2,7 +2,7 @@
 // ====================================================
 
 var Twitter = require('twitter');
-var constants = require('../../model/constants');
+var constants = require('../../model/constants').twitter;
 var converter = require('./converter');
 var serverEvents = require('../../server').serverEvents;
 
@@ -11,10 +11,10 @@ var socket;
 // Twitter object initialization with auth data
 // ============================================
 var twitter = new Twitter({
-    consumer_key: constants.twitterTokens.CONSUMER_KEY,
-    consumer_secret: constants.twitterTokens.CONSUMER_SECRET,
-    access_token_key: constants.twitterTokens.ACCESS_TOKEN_KEY,
-    access_token_secret: constants.twitterTokens.ACCESS_TOKEN_SECRET,
+    consumer_key: constants.tokens.CONSUMER_KEY,
+    consumer_secret: constants.tokens.CONSUMER_SECRET,
+    access_token_key: constants.tokens.ACCESS_TOKEN_KEY,
+    access_token_secret: constants.tokens.ACCESS_TOKEN_SECRET,
 });
 
 // Event listeners
@@ -35,7 +35,7 @@ serverEvents.on('connector', function() {
 
 // Listen to mentions and emit them through the socket
 var listen = function() {
-    twitter.stream('statuses/filter', { track: constants.twitterTokens.USER_NAME }, function(stream) {
+    twitter.stream('statuses/filter', { track: constants.tokens.USER_NAME }, function(stream) {
         stream.on('data', function(data) {
             socket.emit('mention', converter.twitterToMention(data));
         });

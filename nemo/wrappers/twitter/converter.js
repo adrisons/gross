@@ -17,8 +17,6 @@ var twitterToMention = function(twitterMention) {
             url: "http://www.twitter.com/" + twitterMention.user.screen_name,
             followers: twitterMention.user.followers_count
         },
-        retweet_count: twitterMention.retweet_count,
-        favorite_count: twitterMention.favorite_count,
         // Nullable. If the represented Tweet is a reply, this field will contain the string representation of the original Tweet’s ID
         replied_id: twitterMention.in_reply_to_status_id_str
     }

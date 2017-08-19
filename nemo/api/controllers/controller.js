@@ -15,7 +15,6 @@ exports.init = function(req, res) {
 };
 
 exports.reply = function(req, res) {
-    console.log("reply!");
     if (req.body.social === 'twitter') {
         reply(req, res, twitterConnector);
     } else if (req.body.social === 'instagram') {
@@ -24,8 +23,11 @@ exports.reply = function(req, res) {
 };
 
 var reply = function(req, res, connector) {
-    console.log(req.body.social + "object:\n" + JSON.stringify(req.body));
-    connector.reply(req.body.id, req.body.login, req.body.text).then(function(data) {
-        console.log(data);
-    });
+    console.log('Reply: ' + req.body.social + "object:\n" + JSON.stringify(req.body));
+    connector.reply(req.body.id, req.body.user.login, req.body.text)
+        .then(function(data) {
+            console.log(data);
+        }).catch(function(reason) {
+            console.log(reason.statusCode + " " + reason.error);
+        });
 };

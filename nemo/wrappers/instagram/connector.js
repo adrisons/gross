@@ -6,17 +6,15 @@
 // 
 // ====================================================
 
-var constants = require('../../model/constants');
+var constants = require('../../model/constants').instagram;
 var converter = require('./converter');
 var request = require('request');
 var serverEvents = require('../../server').serverEvents;
-// https://github.com/totemstech/instagram-node
-var instagram = require('instagram-node').instagram();
 
 var socket;
 
 const baseUrl = "https://api.instagram.com/v1";
-const accessTokenUrlParameter = "?access_token=" + constants.instagramTokens.ACCESS_TOKEN;
+const accessTokenUrlParameter = "?access_token=" + constants.tokens.ACCESS_TOKEN;
 
 var refreshInterval = 6000;
 var addedComments = {};
@@ -32,13 +30,6 @@ serverEvents.on('socket', function(_socket) {
 
 // Starts the listening for mentions
 serverEvents.on('connector', function() {
-    // Every call to `instagram.use()` overrides the `client_id/client_secret` 
-    // or `access_token` previously entered if they exist. 
-    instagram.use({ access_token: constants.instagramTokens.ACCESS_TOKEN });
-    instagram.use({
-        client_id: constants.instagramTokens.CLIENT_ID,
-        client_secret: constants.instagramTokens.CLIENT_SECRET
-    });
     listen();
 });
 
@@ -66,7 +57,8 @@ var listen = function() {
 
                                 // send it through the socket
                                 if (socket) {
-                                    socket.emit('mention', instagramToMention(comment));
+                                    var mention = converter.instagramToMention(comment);
+                                    socket.emit('mention', mention);
 
                                     // Mark as saved
                                     addedComments[comment.id] = true;
@@ -85,29 +77,11 @@ var listen = function() {
 // Gets recent  media
 var getMyRecentMedia = function() {
 
-    /* OPTIONS: { [count], [min_timestamp], [max_timestamp], [min_id], [max_id] }; */
-    // instagram.user_self_media_recent([options,] function(err, medias, pagination, remaining, limit) {});
-    // instagram.use({ access_token: constants.instagramTokens.ACCESS_TOKEN });
-
-    // instagram.user_self_media_recent(function(err, medias, remaining, limit) {
-    //     if (err) {
-    //         console.log(err.message);
-    //         return null;
-    //     } else {
-    //         return medias;
-    //     }
-    // });
-
     var url = baseUrl + "/users/self/media/recent/" + accessTokenUrlParameter;
 
     return new Promise(function(resolve, reject) {
-        request(url, function(error, response, body) {
+        request.get({ url }, function(error, response, body) {
             if (!error && response.statusCode == 200) {
-                console.log("Media : ");
-                for (c in JSON.parse(body).data) {
-                    console.log(c.id + ', ');
-                }
-
                 resolve(JSON.parse(body).data);
             } else {
                 console.log(response.statusCode + " " + error);
@@ -119,22 +93,10 @@ var getMyRecentMedia = function() {
 // Gets last 150 comments for the specified media
 var getCommentsForMedia = function(mediaId) {
 
-    // instagram.comments(mediaId, function(err, result, remaining, limit) {
-    //     if (err) {
-    //         console.log(err.message);
-    //         return null;
-    //     } else {
-    //         return result;
-    //     }
-    // });
-
-
     var url = baseUrl + "/media/" + mediaId + "/comments" + accessTokenUrlParameter;
-
     return new Promise(function(resolve, reject) {
-        request(url, function(error, response, body) {
+        request.get({ url }, function(error, response, body) {
             if (!error && response.statusCode == 200) {
-                console.log("Comments: " + JSON.parse(body).data);
                 resolve(JSON.parse(body).data);
             } else {
                 console.log(response.statusCode + " " + error);
@@ -147,29 +109,28 @@ var getCommentsForMedia = function(mediaId) {
 // Reply for a comment
 var reply = function(mediaId, login, text) {
 
-    // Add reference to the original user in the message
-    if (text.index(login) != -1) {
-        text = '@' + login + text;
-    }
+    return new Promise(function(resolve, reject) {
 
-    instagram.add_comment(mediaId, text, function(err, result, remaining, limit) {
-        if (err) {
-            console.log(err.message);
-            return null;
-        } else {
-            return result;
+        // Add reference to the original user in the message
+        if (text && text.indexOf(login) == -1) {
+            text = '@' + login + ' ' + text;
         }
+        if (!text || text.length > constants.MAX_COMMENT_SIZE) {
+            console.log('Error: comment length (' + text.length + ') exceeds maximum length (' + constants.MAX_COMMENT_SIZE + ')');
+            console.log('Comment: ' + text);
+            return;
+        }
+
+        var url = baseUrl + "/media/" + mediaId + "/comments";
+
+        request.post({ url: url, form: { access_token: constants.tokens.ACCESS_TOKEN, text: text } },
+            function(error, response, body) {
+                if (error || response.statusCode != 200) {
+                    reject({ statusCode: response.statusCode, error: error });
+                }
+                resolve(JSON.parse(body).data);
+            });
     });
-
-
-    // var url = baseUrl + "/media/" + mediaId + "/comments";
-
-    // request.post({ url: url, access_token: constants.instagramTokens.ACCESS_TOKEN, text: text },
-    //     function(err, response, body) {
-    //         if (error || response.statusCode != 200) {
-    //             console.log(response.statusCode + " " + error);
-    //         }
-    //     });
 
 }
 

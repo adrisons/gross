@@ -17,10 +17,14 @@ var instagramToMention = function(instagramMention) {
             url: "http://www.instagram.com/" + instagramMention.from.username,
             followers: undefined
         },
-        retweet_count: undefined,
-        favorite_count: undefined,
         // Nullable. If the represented Message is a reply, this field will contain the string representation of the original Message’s ID
         replied_id: undefined
     }
     return mention;
 }
+
+
+// Exports
+// =======
+exports.instagramToMention = instagramToMention;
+// exports.mentionToInstagram = mentionToInstagram;

@@ -11,7 +11,7 @@ module.exports = function(request, response, next) {
         var duration = +new Date() - start;
 
         var message = method + ' to ' + url +
-            '\ntook ' + duration + ' milliseconds \n\n';
+            ' (' + duration + ' ms)\n';
 
         stream.write(message);
 

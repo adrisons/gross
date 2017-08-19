@@ -4,15 +4,29 @@ var Schema = mongoose.Schema;
 
 
 var MessageSchema = new Schema({
+    origin: {
+        type: [{
+            type: String,
+            enum: ['twitter', 'instagram', 'facebook']
+        }],
+        Required: 'Kindly enter the social network'
+    },
+    // Message Id from the social network
+    id: {
+        type: String,
+        Required: 'Kindly enter the message id'
+    },
+    // Created date
+    date: {
+        type: Date,
+        default: Date.now
+    },
     text: {
         type: String,
         Required: 'Kindly enter the message'
     },
-    created_date: {
-        type: Date,
-        default: Date.now
-    },
-    user_sender: {
+    // Login of the user sender
+    user_login: {
         type: String,
         Required: 'Kindly enter the login of the user'
     },
