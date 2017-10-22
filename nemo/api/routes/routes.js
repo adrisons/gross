@@ -15,6 +15,14 @@ router.route('/')
         response.json('POST Glu glu!');
     });
 
+// Logging
+// =======
+router.route('/register')
+    .post(controller.register);
+
+router.route('/login')
+    .post(controller.login);
+
 
 router.route('/reply')
     .post(controller.reply);

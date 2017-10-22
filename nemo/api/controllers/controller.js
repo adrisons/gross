@@ -4,14 +4,22 @@
 
 
 var path = require('path');
-// var mongoose = require('mongoose');
-// var Message = mongoose.model('Message');
 var twitterConnector = require('../../wrappers/twitter/connector');
 var instagramConnector = require('../../wrappers/instagram/connector');
-
+var bbddService = require('../../common/services/mysqlService')
 
 exports.init = function(req, res) {
     res.sendFile(path.join(__dirname, '../../public/HTML', 'index.html'));
+};
+
+
+exports.register = function(req, res) {
+    bbddService.register(req, res);
+};
+
+
+exports.login = function(req, res) {
+    bbddService.login(req, res);
 };
 
 exports.reply = function(req, res) {
@@ -23,7 +31,7 @@ exports.reply = function(req, res) {
 };
 
 var reply = function(req, res, connector) {
-    console.log('Reply: ' + req.body.social + "object:\n" + JSON.stringify(req.body));
+    console.log('Reply ' + req.body.social + ": " + JSON.stringify(req.body));
     connector.reply(req.body.id, req.body.user.login, req.body.text)
         .then(function(data) {
             console.log(data);

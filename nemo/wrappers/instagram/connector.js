@@ -85,6 +85,7 @@ var getMyRecentMedia = function() {
                 resolve(JSON.parse(body).data);
             } else {
                 console.log(response.statusCode + " " + error);
+                console.log(response.body);
             }
         });
     });
@@ -125,10 +126,10 @@ var reply = function(mediaId, login, text) {
 
         request.post({ url: url, form: { access_token: constants.tokens.ACCESS_TOKEN, text: text } },
             function(error, response, body) {
-                if (error || response.statusCode != 200) {
-                    reject({ statusCode: response.statusCode, error: error });
+                if (response.statusCode != 200) {
+                    reject({ statusCode: response.statusCode, error: error ? error : body });
                 }
-                resolve(JSON.parse(body).data);
+                resolve(true);
             });
     });
 
