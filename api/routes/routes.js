@@ -5,11 +5,12 @@ var express = require('express');
 var router = express.Router();
 var parseRouteName = require('../../common/parsers/parse-route-name')();
 var controller = require('../controllers/controller');
-
+const api = '/api';
+const user = '/user';
 // Routing
 // =======
 
-router.route('/')
+router.route(api + '/')
     .get(controller.init)
     .post(function(request, response) {
         response.json('POST Glu glu!');
@@ -17,18 +18,18 @@ router.route('/')
 
 // Logging
 // =======
-router.route('/register')
+router.route(api + user + '/register')
     .post(controller.register);
 
-router.route('/login')
+router.route(api + user + '/login')
     .post(controller.login);
 
 
-router.route('/reply')
+router.route(api + '/reply')
     .post(controller.reply);
 
 
-router.route('/:name')
+router.route(api + '/:name')
     .all(parseRouteName)
     .get(function(request, response) {
         response.json('GET Requested: ' + request.name);

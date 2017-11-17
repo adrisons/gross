@@ -19,6 +19,7 @@
     "twitter": "^1.7.0"
   },
   "devDependencies": {
+    "@angular/cli": "^1.4.9",
     "nodemon": "^1.11.0"
   }
 }

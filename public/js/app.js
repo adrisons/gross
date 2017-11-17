@@ -1,4 +1,4 @@
-angular.module('mosix', []);
+angular.module('nemo', []);
 
 function mainController($scope, $http) {
 

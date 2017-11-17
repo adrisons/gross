@@ -10,9 +10,9 @@ var connection = mysql.createConnection({
 
 connection.connect(function(err) {
     if (!err) {
-        console.log("Database is connected ... nn");
+        console.log("Database is connected ...");
     } else {
-        console.log("Error connecting database ... nn");
+        console.log("Error connecting database ...\n" + err);
     }
 });
 
@@ -38,13 +38,13 @@ exports.register = function(req, res) {
                 console.log("(register) error ocurred", error);
                 res.send({
                     "code": 400,
-                    "failed": "error ocurred when registering user"
+                    "message": "error ocurred when registering user"
                 })
             } else {
                 console.log('(register) The solution is: ', results);
                 res.send({
                     "code": 200,
-                    "success": "user registered sucessfully"
+                    "message": "user registered sucessfully"
                 });
             }
         });
@@ -59,7 +59,7 @@ exports.login = function(req, res) {
             console.log("(login) error ocurred", error);
             res.send({
                 "code": 400,
-                "failed": "error ocurred"
+                "message": "error ocurred"
             })
         } else {
             console.log('(login) The solution is: ', results);
@@ -68,19 +68,19 @@ exports.login = function(req, res) {
                     if (doesMatch) {
                         res.send({
                             "code": 200,
-                            "success": "login sucessfull"
+                            "message": "login sucessfull"
                         });
                     } else {
                         res.send({
-                            "code": 204,
-                            "success": "Email and password does not match"
+                            "code": 401,
+                            "message": "Email and/or password are not correct"
                         });
                     }
                 });
             } else {
                 res.send({
-                    "code": 204,
-                    "success": "Email does not exits"
+                    "code": 403,
+                    "message": "Email does not exist"
                 });
             }
         }

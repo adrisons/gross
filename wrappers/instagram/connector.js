@@ -30,7 +30,7 @@ serverEvents.on('socket', function(_socket) {
 
 // Starts the listening for mentions
 serverEvents.on('connector', function() {
-    listen();
+    // listen();
 });
 
 // Private functions
