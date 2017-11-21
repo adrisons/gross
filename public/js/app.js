@@ -1,6 +1,6 @@
-angular.module('nemo', []);
+var app = angular.module('nemo', []);
 
-function mainController($scope, $http) {
+app.controller('mainController', function($scope, $http) {
 
     // Lista de menciones
     $scope.mentions = [];
@@ -43,4 +43,4 @@ function mainController($scope, $http) {
             console.log("Error");
         });
     }
-}
+});

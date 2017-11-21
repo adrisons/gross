@@ -16,7 +16,7 @@ router.route(api + '/')
         response.json('POST Glu glu!');
     });
 
-// Logging
+// User
 // =======
 router.route(api + user + '/register')
     .post(controller.register);
@@ -24,7 +24,8 @@ router.route(api + user + '/register')
 router.route(api + user + '/login')
     .post(controller.login);
 
-
+// Social
+// =======
 router.route(api + '/reply')
     .post(controller.reply);
 
