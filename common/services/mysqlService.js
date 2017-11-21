@@ -2,6 +2,8 @@
 // ====================================================================
 var bcrypt = require('bcrypt');
 var mysql = require('mysql');
+var User = require('../../model/user');
+
 var connection = mysql.createConnection({
     host: 'localhost',
     user: 'app',
@@ -33,15 +35,11 @@ const USER_TABLE = 'users';
 exports.register = function(req, res) {
     // Check if the user already exists
     authenticate(req, res)
-        .then(function(authCode) {
-            switch (authCode) {
-                case 200:
-                    res.send({
-                        "code": 403,
-                        "message": "user already exists"
-                    });
-                    break;
-            }
+        .then(function() {
+            res.send({
+                "code": 403,
+                "message": "user already exists"
+            });
         })
         .catch(function(errorCode) {
             switch (errorCode) {
@@ -71,15 +69,12 @@ exports.register = function(req, res) {
 //   403 - email does not exist
 exports.login = function(req, res) {
     authenticate(req, res)
-        .then(function(authCode) {
-            switch (authCode) {
-                case 200:
-                    res.send({
-                        "code": 200,
-                        "message": "login sucessfull"
-                    });
-                    break;
-            }
+        .then(function(userData) {
+            res.send({
+                "code": 200,
+                "message": "login sucessfull",
+                "data": User.newObject(userData)
+            });
         })
         .catch(function(errorCode) {
             switch (errorCode) {
@@ -115,16 +110,9 @@ exports.login = function(req, res) {
 var register = function(req, res) {
     bcrypt.hash(req.body.password, 5, function(err, bcryptedPassword) {
         var today = new Date();
-        var user = {
-            "first_name": req.body.first_name.trim(),
-            "last_name": req.body.last_name.trim(),
-            "email": req.body.email.trim(),
-            "password": bcryptedPassword,
-            "create_time": today,
-            "modify_time": today
-        }
+        var newUser = User.newObject(req.body.first_name.trim(), req.body.last_name.trim(), req.body.email.trim(), today, today, bcryptedPassword);
 
-        connection.query('INSERT INTO ' + SCHEMA_NAME + '.' + USER_TABLE + ' SET ?', user, function(error, results, fields) {
+        connection.query('INSERT INTO ' + SCHEMA_NAME + '.' + USER_TABLE + ' SET ?', newUser, function(error, results, fields) {
             if (error) {
                 console.log("(register) error ocurred", error);
                 res.send({
@@ -135,7 +123,8 @@ var register = function(req, res) {
                 console.log('(register) The solution is: ', results);
                 res.send({
                     "code": 200,
-                    "message": "user registered sucessfully"
+                    "message": "user registered sucessfully",
+                    "data": newUser
                 });
             }
         });
@@ -145,7 +134,7 @@ var register = function(req, res) {
 // Authenticate
 // Checks if user exists and password is correct
 // Returns:
-//   200 - login sucessfull
+//   200 - login sucessfull - return user data
 //   400 - generic error
 //   401 - password is not correct
 //   403 - email does not exist
@@ -165,7 +154,7 @@ var authenticate = function(req, res) {
                     }
                     bcrypt.compare(password, results[0].password, function(err, doesMatch) {
                         if (doesMatch) {
-                            resolve(200);
+                            resolve(results[0]);
                         } else {
                             reject(401);
                         }
