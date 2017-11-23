@@ -1,25 +1,25 @@
 {
-  "name": "nemo",
-  "version": "1.0.0",
-  "description": "Middleware para gestión de redes sociales",
-  "main": "server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon server.js"
-  },
-  "author": "Adrián Pereira Guerra",
-  "license": "ISC",
-  "dependencies": {
-    "bcrypt": "^1.0.3",
-    "body-parser": "^1.15.2",
-    "express": "^4.14.0",
-    "mongoose": "^4.10.7",
-    "path": "^0.12.7",
-    "socket.io": "^1.7.2",
-    "twitter": "^1.7.0"
-  },
-  "devDependencies": {
-    "@angular/cli": "^1.4.9",
-    "nodemon": "^1.11.0"
-  }
+    "name": "nemo",
+    "version": "1.0.0",
+    "description": "Middleware para gestión de redes sociales",
+    "main": "server.js",
+    "scripts": {
+        "test": "node-debug server.js",
+        "start": "nodemon server.js"
+    },
+    "author": "Adrián Pereira Guerra",
+    "license": "ISC",
+    "dependencies": {
+        "bcrypt": "^1.0.3",
+        "body-parser": "^1.15.2",
+        "express": "^4.14.0",
+        "mongoose": "^4.10.7",
+        "path": "^0.12.7",
+        "socket.io": "^1.7.2",
+        "twitter": "^1.7.0"
+    },
+    "devDependencies": {
+        "@angular/cli": "^1.4.9",
+        "nodemon": "^1.11.0"
+    }
 }

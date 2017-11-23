@@ -34,7 +34,7 @@ const USER_TABLE = 'users';
 //   403 - user doesnt exist -> register
 exports.register = function(req, res) {
     // Check if the user already exists
-    authenticate(req, res)
+    authenticate(req)
         .then(function() {
             res.send({
                 "code": 403,
@@ -61,42 +61,39 @@ exports.register = function(req, res) {
         });
 };
 
+
 // Login. Public function for login users
 // Returns:
-//   200 - login sucessfull
+//   200 - login successfull
 //   400 - generic error
 //   401 - password is not correct
 //   403 - email does not exist
 exports.login = function(req, res) {
-    authenticate(req, res)
-        .then(function(userData) {
+    authenticate(req)
+        .then(function(user) {
             res.send({
                 "code": 200,
-                "message": "login sucessfull",
-                "data": User.newObject(userData)
+                "message": "login successfull",
+                "data": user
             });
+
         })
-        .catch(function(errorCode) {
-            switch (errorCode) {
-                case 401:
-                    res.send({
-                        "code": 401,
-                        "message": "password is not correct"
-                    });
-                    break;
-                case 403:
-                    res.send({
-                        "code": 403,
-                        "message": "email does not exist"
-                    });
-                    break;
-                default:
-                    res.send({
-                        "code": 400,
-                        "message": "error ocurred"
-                    })
-            }
-        });
+        .catch(function(errorCode) { processAuthErrorCode(res, errorCode); });
+};
+
+
+// Login. Public function for login users
+// Returns:
+//   200 - login successfull
+//   400 - generic error
+//   401 - password is not correct
+//   403 - email does not exist
+exports.update = function(req, res) {
+    authenticate(req)
+        .then(function(user) {
+            updateUser(user, req, res);
+        })
+        .catch(function(errorCode) { processAuthErrorCode(res, errorCode); });
 };
 
 // ====================================================================
@@ -105,12 +102,12 @@ exports.login = function(req, res) {
 
 // Register user
 // Returns:
-//   200 - register sucessfull
+//   200 - register successfull
 //   400 - generic error
 var register = function(req, res) {
     bcrypt.hash(req.body.password, 5, function(err, bcryptedPassword) {
         var today = new Date();
-        var newUser = User.newObject(req.body.first_name.trim(), req.body.last_name.trim(), req.body.email.trim(), today, today, bcryptedPassword);
+        var newUser = new User(null, req.body.first_name.trim(), req.body.last_name.trim(), req.body.email.trim(), today, today, bcryptedPassword);
 
         connection.query('INSERT INTO ' + SCHEMA_NAME + '.' + USER_TABLE + ' SET ?', newUser, function(error, results, fields) {
             if (error) {
@@ -123,7 +120,7 @@ var register = function(req, res) {
                 console.log('(register) The solution is: ', results);
                 res.send({
                     "code": 200,
-                    "message": "user registered sucessfully",
+                    "message": "user registered successfully",
                     "data": newUser
                 });
             }
@@ -134,27 +131,35 @@ var register = function(req, res) {
 // Authenticate
 // Checks if user exists and password is correct
 // Returns:
-//   200 - login sucessfull - return user data
+//   200 - auth successfull - return user data
 //   400 - generic error
 //   401 - password is not correct
 //   403 - email does not exist
-var authenticate = function(req, res) {
-    var email = req.body.email.trim();
-    var password = req.body.password;
+var authenticate = function(req) {
+    var query = 'SELECT * FROM ' + SCHEMA_NAME + '.' + USER_TABLE + ' WHERE ';
+    var params = [];
+    if (req.body.id) {
+        query += ' id = ?';
+        params.push(req.body.id);
+    } else if (req.body.email) {
+        query += ' email = ?';
+        params.push(req.body.email.trim());
+    }
+
     return new Promise(function(resolve, reject) {
-        connection.query('SELECT * FROM ' + SCHEMA_NAME + '.' + USER_TABLE + ' WHERE email = ?', [email], function(error, results, fields) {
+        connection.query(query, params, function(error, results, fields) {
             if (error) {
-                console.log("(login) error ocurred", error);
+                console.log("(auth) error ocurred", error);
                 reject(400);
             } else {
-                console.log('(login) The solution is: ', results);
+                console.log('(auth) The solution is: ', results);
                 if (results.length > 0) {
                     if (results.length > 1) {
-                        console.log('(login) Multiple users for same email: ', results);
+                        console.log('(auth) Multiple users for same email: ', results);
                     }
-                    bcrypt.compare(password, results[0].password, function(err, doesMatch) {
+                    bcrypt.compare(req.body.password, results[0].password, function(err, doesMatch) {
                         if (doesMatch) {
-                            resolve(results[0]);
+                            resolve(new User(results[0]));
                         } else {
                             reject(401);
                         }
@@ -165,4 +170,100 @@ var authenticate = function(req, res) {
             }
         });
     });
+};
+
+var getUserUpdateQuery = function(user) {
+    var today = new Date();
+    var query = "UPDATE " + SCHEMA_NAME + "." + USER_TABLE + " SET";
+    var is_first = true;
+    if (!user.id) {
+        return '';
+    }
+    if (user.first_name) {
+        if (!is_first) {
+            query += ',';
+        }
+        is_first = false;
+        query += " first_name='" + user.first_name.trim() + "'";
+    }
+    if (user.last_name) {
+        if (!is_first) {
+            query += ',';
+        }
+        is_first = false;
+        query += " last_name='" + user.last_name.trim() + "'";
+    }
+    if (user.email) {
+        if (!is_first) {
+            query += ',';
+        }
+        is_first = false;
+        query += " email='" + user.email.trim() + "'";
+    }
+    // query += " update_time=" + user.update_time;
+
+    query += " WHERE id=" + user.id;
+
+    return query;
+
+};
+
+// Update user
+// Returns:
+//   200 - Update successfull
+//   400 - generic error
+var updateUser = function(user, req, res) {
+    var query = getUserUpdateQuery(user);
+    if (!query) {
+        res.send({
+            "code": 400,
+            "message": "error ocurred updating user"
+        })
+    }
+    connection.query(query, function(error, results, fields) {
+        if (error) {
+            console.log("(update) error ocurred", error);
+            res.send({
+                "code": 400,
+                "message": "error ocurred updating user"
+            })
+        } else {
+            console.log('(update) The solution is: ', results);
+            res.send({
+                "code": 200,
+                "message": "user updated successfully",
+                "data": user
+            });
+        }
+
+    });
+};
+
+
+// Auth error processing
+// Generic responses for http codes
+// Returns:
+//   400 - generic error
+//   401 - password is not correct
+//   403 - email does not exist
+var processAuthErrorCode = function(res, errorCode) {
+    switch (errorCode) {
+        case 401:
+            res.send({
+                "code": 401,
+                "message": "password is not correct"
+            });
+            break;
+        case 403:
+            res.send({
+                "code": 403,
+                "message": "email does not exist"
+            });
+            break;
+        default:
+            res.send({
+                "code": 400,
+                "message": "error ocurred"
+            })
+    }
 };
