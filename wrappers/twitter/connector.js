@@ -14,7 +14,7 @@ var twitter = new Twitter({
     consumer_key: constants.tokens.CONSUMER_KEY,
     consumer_secret: constants.tokens.CONSUMER_SECRET,
     access_token_key: constants.tokens.ACCESS_TOKEN_KEY,
-    access_token_secret: constants.tokens.ACCESS_TOKEN_SECRET,
+    access_token_secret: constants.tokens.ACCESS_TOKEN_SECRET
 });
 
 // Event listeners

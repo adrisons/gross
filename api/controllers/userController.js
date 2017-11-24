@@ -2,7 +2,7 @@
 // ==========
 'use strict';
 
-var bbddService = require('../../common/services/mysqlService')
+var bbddService = require('../../common/services/userService');
 
 
 exports.register = function(req, res) {
