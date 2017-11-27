@@ -3,52 +3,69 @@
 'use strict';
 
 var express = require('express');
+var expressJwt = require('express-jwt');
 var app = express();
-// var mongoose = require('mongoose');
-var Message = require("./api/models/message");
 var bodyParser = require('body-parser');
-var events = require('events');
-var serverEvents = new events.EventEmitter();
-
-// BBDD
-// ======================
-// mongoose.Promise = global.Promise;
-// mongoose.connect("mongodb://localhost/Messages");
-
+var serverEvents = new(require('events')).EventEmitter();
+var config = require('./model/constants.js').config;
+var cors = require('cors');
 // export the serverEvents object so others can use it
 exports.serverEvents = serverEvents;
 
 // Add headers
-app.use(function(req, res, next) {
+app.use(cors());
+// app.use(function(req, res, next) {
 
-    // Website you wish to allow to connect
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
+//     // Website you wish to allow to connect
+//     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
 
-    // Request methods you wish to allow
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+//     // Request methods you wish to allow
+//     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
 
-    // Request headers you wish to allow
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+//     // Request headers you wish to allow
+//     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, content-type, authorization');
 
-    // Set to true if you need the website to include cookies in the requests sent
-    // to the API (e.g. in case you use sessions)
-    res.setHeader('Access-Control-Allow-Credentials', true);
+//     // Set to true if you need the website to include cookies in the requests sent
+//     // to the API (e.g. in case you use sessions)
+//     res.setHeader('Access-Control-Allow-Credentials', true);
 
-    // Pass to next layer of middleware
-    next();
-});
+//     // Pass to next layer of middleware
+//     next();
+// });
 
 // Logging
 // ======================
 var logger = require('./common/logs/logger');
 app.use(logger);
 
-// Server configuration
-// ====================
-const PORT = process.env.PORT || 3000;
 // Necesario para la recuperación de parámetros de un post
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+// use JWT auth to secure the api, the token can be passed in the authorization header or querystring
+app.use(expressJwt({
+    secret: config.secret,
+    getToken: function(req) {
+        if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+            return req.headers.authorization.split(' ')[1];
+        } else if (req.query && req.query.token) {
+            return req.query.token;
+        }
+        return null;
+    }
+}).unless({ path: ['/api/user/login', '/api/user/register'] }));
+app.use(function(err, req, res, next) {
+    if (err.name === 'UnauthorizedError') {
+        return res.status(403).send({
+            success: false,
+            message: 'No token provided.'
+        });
+    }
+});
+
+// Server configuration
+// ====================
+const PORT = process.env.PORT || 3000;
 
 // Static resources
 // ================

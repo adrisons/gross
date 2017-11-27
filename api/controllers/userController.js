@@ -1,5 +1,5 @@
-// Controller
-// ==========
+// User Controller
+// ===============
 'use strict';
 
 var bbddService = require('../../common/services/userService');

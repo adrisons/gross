@@ -3,8 +3,9 @@
 
 var bcrypt = require('bcrypt');
 var User = require('../../model/user');
+var jwt = require('jsonwebtoken');
 var [connection, SCHEMA_NAME] = require('../../common/services/mysqlService');
-
+var config = require('../../model/constants').config;
 const USER_TABLE = 'users';
 
 // ====================================================================
@@ -35,7 +36,22 @@ exports.register = function(req, res) {
                     });
                     break;
                 case 403:
-                    register(req, res);
+                    register(req, res)
+                        .then(function() {
+                            console.log("user registered successfully");
+                            login(req, res);
+                            // res.send({
+                            //     "code": 200,
+                            //     "message": "user registered successfully",
+                            //     "data": { email: req.body.password, password: req.body.password }
+                            // });
+                        })
+                        .catch(function() {
+                            res.send({
+                                "code": 400,
+                                "message": "error ocurred registering user"
+                            });
+                        })
                     break;
                 default:
                     res.send({
@@ -53,9 +69,10 @@ exports.register = function(req, res) {
 //   400 - generic error
 //   401 - password is not correct
 //   403 - email does not exist
-exports.login = function(req, res) {
+var login = function(req, res) {
     authenticate(req)
         .then(function(user) {
+            user.token = jwt.sign({ id: user.id }, config.secret);
             res.send({
                 "code": 200,
                 "message": "login successfull",
@@ -66,6 +83,7 @@ exports.login = function(req, res) {
         .catch(function(errorCode) { processAuthErrorCode(res, errorCode); });
 };
 
+exports.login = login;
 
 // Login. Public function for login users
 // Returns:
@@ -92,23 +110,19 @@ exports.update = function(req, res) {
 var register = function(req, res) {
     bcrypt.hash(req.body.password, 5, function(err, bcryptedPassword) {
         var today = new Date();
-        var newUser = new User(null, req.body.first_name.trim(), req.body.last_name.trim(), req.body.email.trim(), today, today, bcryptedPassword);
+        var newUser = User.newUser(null, req.body.first_name.trim(), req.body.last_name.trim(), req.body.email.trim(), today, today, bcryptedPassword);
+        return new Promise(function(resolve, reject) {
+            connection.query('INSERT INTO ' + SCHEMA_NAME + '.' + USER_TABLE + ' SET ?', newUser, function(error, results, fields) {
+                if (error) {
+                    console.log("(register) error ocurred", error);
+                    reject(400);
 
-        connection.query('INSERT INTO ' + SCHEMA_NAME + '.' + USER_TABLE + ' SET ?', newUser, function(error, results, fields) {
-            if (error) {
-                console.log("(register) error ocurred", error);
-                res.send({
-                    "code": 400,
-                    "message": "error ocurred registering user"
-                })
-            } else {
-                console.log('(register) The solution is: ', results);
-                res.send({
-                    "code": 200,
-                    "message": "user registered successfully",
-                    "data": newUser
-                });
-            }
+                } else {
+                    console.log('(register) The solution is: ', results);
+                    resolve(200);
+
+                }
+            });
         });
     });
 };
@@ -144,7 +158,7 @@ var authenticate = function(req) {
                     }
                     bcrypt.compare(req.body.password, results[0].password, function(err, doesMatch) {
                         if (doesMatch) {
-                            resolve(new User(results[0]));
+                            resolve(User.toUser(results[0]));
                         } else {
                             reject(401);
                         }
@@ -157,37 +171,37 @@ var authenticate = function(req) {
     });
 };
 
-var getUserUpdateQuery = function(user) {
+var getUserUpdateQuery = function(oldUser, newUser) {
     var today = new Date();
     var query = "UPDATE " + SCHEMA_NAME + "." + USER_TABLE + " SET";
     var is_first = true;
-    if (!user.id) {
+    if (!oldUser.id) {
         return '';
     }
-    if (user.first_name) {
+    if (newUser.first_name) {
         if (!is_first) {
             query += ',';
         }
         is_first = false;
-        query += " first_name='" + user.first_name.trim() + "'";
+        query += " first_name='" + newUser.first_name.trim() + "'";
     }
-    if (user.last_name) {
+    if (newUser.last_name) {
         if (!is_first) {
             query += ',';
         }
         is_first = false;
-        query += " last_name='" + user.last_name.trim() + "'";
+        query += " last_name='" + newUser.last_name.trim() + "'";
     }
-    if (user.email) {
+    if (newUser.email) {
         if (!is_first) {
             query += ',';
         }
         is_first = false;
-        query += " email='" + user.email.trim() + "'";
+        query += " email='" + newUser.email.trim() + "'";
     }
     // query += " update_time=" + user.update_time;
 
-    query += " WHERE id=" + user.id;
+    query += " WHERE id=" + oldUser.id;
 
     return query;
 
@@ -198,7 +212,7 @@ var getUserUpdateQuery = function(user) {
 //   200 - Update successfull
 //   400 - generic error
 var updateUser = function(user, req, res) {
-    var query = getUserUpdateQuery(user);
+    var query = getUserUpdateQuery(user, req.body);
     if (!query) {
         res.send({
             "code": 400,
@@ -217,7 +231,7 @@ var updateUser = function(user, req, res) {
             res.send({
                 "code": 200,
                 "message": "user updated successfully",
-                "data": user
+                "data": req.body
             });
         }
 
