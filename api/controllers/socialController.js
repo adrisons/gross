@@ -7,12 +7,39 @@ var instagramConnector = require('../../wrappers/instagram/connector');
 // var facebookConnector = require('../../wrappers/facebook/connector');
 
 
-// Authenticate a social network for one user
-exports.auth = function(req, res) {
+// Save credentials of a social network for one user
+exports.add = function(req, res) {
+    // Guardar token y tipo de red social para el usuario
+    const user_rs = {
+        type: { id: 0, name: 'facebook' },
+        login: '',
+        email: 'adrian@gmail.com',
+        token: req.body.access_token,
+    };
+    res.send({
+        "code": 200,
+        "message": "Social network saved successfully",
+        "data": user_rs
+    });
     if (req.body.social === 'twitter') {
-        auth(req, res, twitterConnector);
-    } else if (req.body.social === 'instagram') {
-        auth(req, res, instagramConnector);
+        // add(req, res, twitterConnector);
+    } else if (req.body.social === 'facebook') {
+        // add(req, res, instagramConnector);
+    }
+};
+// Delete social network credentials for one user
+exports.delete = function(req, res) {
+    // Guardar token y tipo de red social para el usuario
+    res.send({
+        "code": 200,
+        "message": "Social network deleted successfully",
+        "token": req.body.access_token,
+        // "data": user_rs
+    });
+    if (req.body.social === 'twitter') {
+        // delete(req, res, twitterConnector);
+    } else if (req.body.social === 'facebook') {
+        // delete(req, res, instagramConnector);
     }
 };
 

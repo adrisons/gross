@@ -37,21 +37,6 @@ exports.register = function(req, res) {
                     break;
                 case 403:
                     register(req, res)
-                        .then(function() {
-                            console.log("user registered successfully");
-                            login(req, res);
-                            // res.send({
-                            //     "code": 200,
-                            //     "message": "user registered successfully",
-                            //     "data": { email: req.body.password, password: req.body.password }
-                            // });
-                        })
-                        .catch(function() {
-                            res.send({
-                                "code": 400,
-                                "message": "error ocurred registering user"
-                            });
-                        })
                     break;
                 default:
                     res.send({
@@ -73,6 +58,8 @@ var login = function(req, res) {
     authenticate(req)
         .then(function(user) {
             user.token = jwt.sign({ id: user.id }, config.secret);
+            user.social = [];
+            console.log('(login) return: ', user);
             res.send({
                 "code": 200,
                 "message": "login successfull",
@@ -111,19 +98,25 @@ var register = function(req, res) {
     bcrypt.hash(req.body.password, 5, function(err, bcryptedPassword) {
         var today = new Date();
         var newUser = User.newUser(null, req.body.first_name.trim(), req.body.last_name.trim(), req.body.email.trim(), today, today, bcryptedPassword);
-        return new Promise(function(resolve, reject) {
-            connection.query('INSERT INTO ' + SCHEMA_NAME + '.' + USER_TABLE + ' SET ?', newUser, function(error, results, fields) {
-                if (error) {
-                    console.log("(register) error ocurred", error);
-                    reject(400);
 
-                } else {
-                    console.log('(register) The solution is: ', results);
-                    resolve(200);
+        connection.query('INSERT INTO ' + SCHEMA_NAME + '.' + USER_TABLE + ' SET ?', newUser, function(error, results, fields) {
+            if (error) {
+                console.log("(register) error ocurred", error);
 
-                }
-            });
+                res.send({
+                    "code": 400,
+                    "message": "error ocurred registering user"
+                });
+
+            } else {
+                console.log('(register) The solution is: ', results);
+
+                console.log("user registered successfully");
+                login(req, res);
+
+            }
         });
+
     });
 };
 

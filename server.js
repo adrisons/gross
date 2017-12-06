@@ -87,14 +87,14 @@ var server = app.listen(PORT, function() {
     console.log("Nemo server running on http://localhost:" + PORT);
 });
 
-var io = require('socket.io')(server);
+// var io = require('socket.io')(server);
 
 // Bidirectional conection with front
 // ==================================
-io.on('connection', function(socket) {
-    serverEvents.emit('socket', socket);
-});
+// io.on('connection', function(socket) {
+// serverEvents.emit('socket', socket);
+// });
 
 // Tell the connectors to start listening
 // ======================================
-serverEvents.emit('connector');
+// serverEvents.emit('connector');

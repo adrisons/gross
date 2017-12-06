@@ -6,8 +6,11 @@ var router = express.Router();
 var parseRouteName = require('../../common/parsers/parse-route-name')();
 var controller = require('../controllers/controller');
 var userController = require('../controllers/userController');
-var socialController = require('../controllers/socialController');
+
+var facebookCtrl = require('../../wrappers/facebook/controller');
+var twitterCtrl = require('../../wrappers/twitter/controller');
 const api = '/api';
+
 // Routing
 // =======
 
@@ -19,33 +22,44 @@ router.route(api + '/')
 
 // User
 // ===================================
-const user = '/user';
+const userroute = api + '/user';
 // Register
-router.route(api + user + '/register')
+router.route(userroute + '/register')
     .post(userController.register);
 
 // Login
-router.route(api + user + '/login')
+router.route(userroute + '/login')
     .post(userController.login);
 
 // Update
-router.route(api + user)
+router.route(userroute)
     .put(userController.update);
 
 // Social
 // ===================================
-const social = '/social';
-// Add new social network to user
-router.route(api + social + '/auth')
-    .post(socialController.auth);
+const socialroute = api + '/social';
+// ========
+// Facebook
+const fbroute = socialroute + '/fb';
+// Add new facebook account to user
+router.route(fbroute)
+    .post(facebookCtrl.add)
 
-// Delete social network from user
-// router.route(api + social)
+// Remove facebook account from user
+router.route(fbroute + '/rm')
+    .post(facebookCtrl.remove)
 
-//     .delete(socialController.delete);
-// Reply to a message
-router.route(api + '/reply')
-    .post(socialController.reply);
+// ========
+// Twitter
+const twroute = socialroute + '/tw';
+// Add new facebook account to user
+router.route(twroute)
+    .post(twitterCtrl.add)
+
+// Remove facebook account from user
+router.route(twroute + '/rm')
+    .post(twitterCtrl.remove)
+
 
 // router.route(api + '/:name')
 //     .all(parseRouteName)
