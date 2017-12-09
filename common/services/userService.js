@@ -6,7 +6,7 @@ var User = require('../../model/user');
 var jwt = require('jsonwebtoken');
 var [connection, SCHEMA_NAME] = require('../../common/services/mysqlService');
 var config = require('../../model/constants').config;
-const USER_TABLE = 'users';
+const TABLE = 'users';
 
 // ====================================================================
 // PUBLIC FUNCTIONS
@@ -99,7 +99,7 @@ var register = function(req, res) {
         var today = new Date();
         var newUser = User.newUser(null, req.body.first_name.trim(), req.body.last_name.trim(), req.body.email.trim(), today, today, bcryptedPassword);
 
-        connection.query('INSERT INTO ' + SCHEMA_NAME + '.' + USER_TABLE + ' SET ?', newUser, function(error, results, fields) {
+        connection.query('INSERT INTO ' + SCHEMA_NAME + '.' + TABLE + ' SET ?', newUser, function(error, results, fields) {
             if (error) {
                 console.log("(register) error ocurred", error);
 
@@ -128,7 +128,7 @@ var register = function(req, res) {
 //   401 - password is not correct
 //   403 - email does not exist
 var authenticate = function(req) {
-    var query = 'SELECT * FROM ' + SCHEMA_NAME + '.' + USER_TABLE + ' WHERE ';
+    var query = 'SELECT * FROM ' + SCHEMA_NAME + '.' + TABLE + ' WHERE ';
     var params = [];
     if (req.body.id) {
         query += ' id = ?';
@@ -166,7 +166,7 @@ var authenticate = function(req) {
 
 var getUserUpdateQuery = function(oldUser, newUser) {
     var today = new Date();
-    var query = "UPDATE " + SCHEMA_NAME + "." + USER_TABLE + " SET";
+    var query = "UPDATE " + SCHEMA_NAME + "." + TABLE + " SET";
     var is_first = true;
     if (!oldUser.id) {
         return '';

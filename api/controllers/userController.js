@@ -9,7 +9,6 @@ exports.register = function(req, res) {
     bbddService.register(req, res);
 };
 
-
 exports.login = function(req, res) {
     bbddService.login(req, res);
 };

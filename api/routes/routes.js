@@ -4,6 +4,7 @@
 var express = require('express');
 var router = express.Router();
 var parseRouteName = require('../../common/parsers/parse-route-name')();
+var parseRouteId = require('../../common/parsers/parse-route-id')();
 var controller = require('../controllers/controller');
 var userController = require('../controllers/userController');
 var socialCtrl = require('../controllers/socialController');
@@ -41,33 +42,23 @@ const socialroute = api + '/social';
 // Add new social account
 router.route(socialroute)
     .post(socialCtrl.add);
-
-router.route(socialroute)
+// Remove social account from user
+router.route(socialroute + '/:id')
+    .all(parseRouteId)
     .delete(socialCtrl.remove);
+
+
+
 
 // ========
 // Facebook
 const fbroute = socialroute + '/fb';
-// Add new facebook account to user
-router.route(fbroute)
-    .post(facebookCtrl.add);
 
-// Remove facebook account from user
-router.route(fbroute + '/rm')
-    .post(facebookCtrl.remove);
 
 // ========
 // Twitter
 const twroute = socialroute + '/tw';
 
-
-// Remove twitter account from user
-router.route(twroute + '/rm')
-    .post(twitterCtrl.remove);
-
-// Add new twitter account to user
-router.route(twroute)
-    .post(twitterCtrl.add);
 
 
 

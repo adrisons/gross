@@ -2,6 +2,7 @@
 // =================
 'use strict';
 
+var service = require('../../common/services/socialService');
 
 // Save credentials of a social network for one user
 exports.add = function(req, res) {
@@ -16,9 +17,11 @@ exports.add = function(req, res) {
     res.send({
         "code": 200,
         "message": "Social network saved successfully",
-        "data": user_rs
+        "data": {
+            "id": Math.floor((Math.random() * 1000) + 1)
+        }
     });
-
+    // service.add(req, res);
 };
 // Delete social network credentials for one user
 exports.remove = function(req, res) {
@@ -29,5 +32,5 @@ exports.remove = function(req, res) {
         "token": req.body.access_token,
         // "data": user_rs
     });
-
+    // service.remove(req, res);
 };
