@@ -53,7 +53,7 @@ app.use(expressJwt({
         }
         return null;
     }
-}).unless({ path: ['/api/user/login', '/api/user/register'] }));
+}).unless({ path: ['/api/user/login', '/api/user/register', '/api/social/tw/callback'] }));
 app.use(function(err, req, res, next) {
     if (err.name === 'UnauthorizedError') {
         return res.status(403).send({

@@ -21,14 +21,14 @@ var twitter = new Twitter({
 // =============================================
 
 // Sets the communication socket between modules
-serverEvents.on('socket', function(_socket) {
-    socket = _socket;
-});
+// serverEvents.on('socket', function(_socket) {
+//     socket = _socket;
+// });
 
 // Starts the listening for mentions
-serverEvents.on('connector', function() {
-    listen();
-});
+// serverEvents.on('connector', function() {
+//     listen();
+// });
 
 // Private functions
 // ===================================================

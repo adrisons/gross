@@ -17,7 +17,7 @@ const api = '/api';
 
 router.route(api + '/')
     .get(controller.init)
-    .post(function(request, response) {
+    .post(function (request, response) {
         response.json('POST Glu glu!');
     });
 
@@ -41,7 +41,8 @@ router.route(userroute)
 const socialroute = api + '/social';
 // Add new social account
 router.route(socialroute)
-    .post(socialCtrl.add);
+    .post(socialCtrl.add)
+    .get(socialCtrl.getSocial);
 // Remove social account from user
 router.route(socialroute + '/:id')
     .all(parseRouteId)
@@ -58,6 +59,14 @@ const fbroute = socialroute + '/fb';
 // ========
 // Twitter
 const twroute = socialroute + '/tw';
+router.route(twroute + '/request/:id')
+    .all(parseRouteId)
+    .get(twitterCtrl.getRequestToken);
+router.route(twroute + '/callback')
+    .get(twitterCtrl.getAccessToken);
+router.route(twroute + '/user-data')
+    .get(twitterCtrl.getUserData);
+
 
 
 
