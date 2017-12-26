@@ -119,3 +119,26 @@ exports.getRequestSecret = function (request_token) {
         });
     });
 }
+
+
+
+
+exports.getAccessSecret = function (access_token, user_id) {
+    return new Promise(function (resolve, reject) {
+        // Create query
+        var query = "SELECT access_token_secret";
+        query += ' FROM ' + SCHEMA_NAME + '.' + TABLE;
+        query += ' WHERE access_token="' + access_token + '" AND user_id="' + user_id + '"';
+        console.log('(get-access-secret) query:' + query);
+        // Call the ddbb
+        connection.query(query, function (error, results, fields) {
+            if (error) {
+                console.log("(get-access-secret) error ocurred", error);
+                reject();
+            } else {
+                console.log('(get-access-secret) The solution is: ', JSON.stringify(results));
+                resolve(results[0]);
+            }
+        });
+    });
+}

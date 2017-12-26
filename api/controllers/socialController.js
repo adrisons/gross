@@ -117,12 +117,10 @@ exports.remove = function (req, res) {
 
 // Get social accesses with filters
 exports.getSocial = function (req, res) {
-    console.log('(get-social) params:' + JSON.stringify(req.query));
     getParams(req.query, function (columns, values) {
         getParamsStr('GET', columns, values, function (params) {
             service.getSocial(params)
                 .then(function (userSocialData) {
-                    console.log('(get-social) userSocial=' + userSocialData);
                     res.send({
                         "code": 200,
                         "message": "GET social success!",

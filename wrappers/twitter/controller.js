@@ -115,17 +115,70 @@ exports.getUserData = function (req, res) {
 
 exports.post = function (req, res) {
 
-    twitter.statuses("update", {
-            status: req.body.message
-        },
-        req.body.accessToken,
-        req.body.accessTokenSecret,
-        function (error, data, response) {
-            if (error) {
-                // something went wrong
-            } else {
-                // data contains the data sent by twitter
+    console.log('(twitter-post) body:' + JSON.stringify(req.body));
+    socialService.getAccessSecret(req.body.access_token, req.body.user_id).then(function (data) {
+        var accessTokenSecret = data.access_token_secret;
+        var accessToken = req.body.access_token;
+        console.log('accessToken=' + accessToken);
+        console.log('accessTokenSecret=' + accessTokenSecret);
+        twitter.statuses("update", {
+                status: req.body.message
+            },
+            accessToken,
+            accessTokenSecret,
+            function (error, data, response) {
+                if (error) {
+                    // something went wrong
+                    console.log('(twitter-post) Error:' + JSON.stringify(error));
+                    res.send({
+                        "code": 400,
+                        "message": "Error posting",
+                    });
+                } else {
+                    // data contains the data sent by twitter
+                    console.log('(twitter-post) successful. data:' + JSON.stringify(data));
+                    res.send({
+                        "code": 200,
+                        "message": "Post successfully",
+                        "data": data.user.screen_name
+                    });
+                }
             }
-        }
-    );
+        );
+    });
+}
+
+
+exports.getTimeline = function (req, res) {
+
+    console.log('(twitter-timeline) query:' + JSON.stringify(req.query));
+    socialService.getAccessSecret(req.query.access_token, req.query.user_id).then(function (data) {
+        var accessTokenSecret = data.access_token_secret;
+        var accessToken = req.query.access_token;
+        twitter.getTimeline("home", {
+                count: 25,
+                include_entities: true
+            },
+            accessToken,
+            accessTokenSecret,
+            function (error, data, response) {
+                if (error) {
+                    // something went wrong
+                    console.log('(twitter-timeline) Error:' + JSON.stringify(error));
+                    res.send({
+                        "code": 400,
+                        "message": "Error posting",
+                    });
+                } else {
+                    // data contains the data sent by twitter
+                    console.log('(twitter-timeline) successful. data:' + JSON.stringify(data));
+                    res.send({
+                        "code": 200,
+                        "message": "Post successfully",
+                        "data": data
+                    });
+                }
+            }
+        );
+    });
 }

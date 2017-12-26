@@ -59,6 +59,7 @@ const fbroute = socialroute + '/fb';
 // ========
 // Twitter
 const twroute = socialroute + '/tw';
+// Authentication
 router.route(twroute + '/request/:id')
     .all(parseRouteId)
     .get(twitterCtrl.getRequestToken);
@@ -67,6 +68,11 @@ router.route(twroute + '/callback')
 router.route(twroute + '/user-data')
     .get(twitterCtrl.getUserData);
 
+
+router.route(twroute + '/timeline')
+    .get(twitterCtrl.getTimeline);
+router.route(twroute)
+    .post(twitterCtrl.post);
 
 
 
