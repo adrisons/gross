@@ -35,8 +35,8 @@ app.use(cors());
 
 // Logging
 // ======================
-var logger = require('./common/logs/logger');
-app.use(logger);
+var httpLogger = require('./common/logs/logger').httpLogger;
+app.use(httpLogger);
 
 // Necesario para la recuperación de parámetros de un post
 app.use(bodyParser.urlencoded({ extended: true }));

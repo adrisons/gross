@@ -1,4 +1,5 @@
 // Service for managing data in the social_access table
+var logger = require('../../common/logs/logger').consoleLogger;
 
 var [connection, SCHEMA_NAME] = require('../../common/services/mysqlService');
 const TABLE = 'social_access';
@@ -25,15 +26,15 @@ exports.add = function (columns, values, strParamsForUpdate) {
         // Create query
         var query = 'INSERT INTO ' + SCHEMA_NAME + '.' + TABLE + ' (' + columns.join(', ') + ') VALUES (\"' + values.join('\", \"') + '\")';
         query += ' ON DUPLICATE KEY UPDATE ' + strParamsForUpdate;
-        console.log('(add-social) query=' + query);
+        logger('social', 'add', query);
 
         // Call the ddbb
         connection.query(query, function (error, data, fields) {
             if (error) {
-                console.log("(add-social) error ocurred", error);
+                logger('social', 'add', error);
                 reject();
             } else {
-                console.log('(add-social) The solution is: ', data);
+                logger('social', 'add', data);
                 resolve();
             }
         });
@@ -48,13 +49,15 @@ exports.add = function (columns, values, strParamsForUpdate) {
 //   400 - generic error
 exports.remove = function (access_id) {
     var query = 'DELETE FROM ' + SCHEMA_NAME + '.' + TABLE + ' WHERE id = ' + access_id;
+    logger('social', 'remove', query);
     return new Promise(function (resolve, reject) {
         connection.query(query, function (error, results, fields) {
             if (error) {
-                console.log("(remove-social) error ocurred", error);
+
+                logger('social', 'remove', error);
                 reject(400);
             } else {
-                console.log('(remove-social) The solution is: ', results);
+                logger('social', 'remove', results);
                 resolve(200);
             }
         });
@@ -68,15 +71,16 @@ exports.getSocial = function (variables) {
         query += ' FROM ' + SCHEMA_NAME + '.' + TABLE + ' sa ';
         query += ' JOIN nemo.social_type st ON sa.social_type_id=st.id ';
         query += ' WHERE ' + variables;
-        console.log('(get-social) query=' + query);
-
+        
+        logger('social', 'get', query);
         // Call the ddbb
         connection.query(query, function (error, results, fields) {
             if (error) {
-                console.log("(get-social) error ocurred", error);
+                logger('social', 'get', error);
+                
                 reject();
             } else {
-                console.log('(get-social) The solution is: ', results);
+                logger('social', 'get', results);
                 resolve(results);
             }
         });
@@ -86,13 +90,14 @@ exports.getSocial = function (variables) {
 var getSocialId = function (social_type_id, user_id, social_id, resolve, reject) {
     var query = 'SELECT id FROM ' + SCHEMA_NAME + '.' + TABLE +
         ' where social_type_id=' + social_type_id + ' and user_id=' + user_id + ' and social_id=' + social_id;
+        logger('social', 'getSocialId', query);
     return new Promise(function (resolve, reject) {
         connection.query(query, function (error, results, fields) {
             if (error) {
-                console.log("(get-social-by-id) error ocurred", error);
+                logger('social', 'getSocialId', error);
                 reject(400);
             } else {
-                console.log('(get-social-by-id) The solution is: ', results);
+                logger('social', 'getSocialId', results);
                 resolve(results[0]);
             }
         });
@@ -107,13 +112,14 @@ exports.getRequestSecret = function (request_token) {
         var query = "SELECT request_token_secret, user_id ";
         query += ' FROM ' + SCHEMA_NAME + '.' + TABLE;
         query += ' WHERE request_token="' + request_token + '"';
+        logger('social', 'getRequestSecret', query);
         // Call the ddbb
         connection.query(query, function (error, results, fields) {
             if (error) {
-                console.log("(get-request-secret) error ocurred", error);
+                logger('social', 'getRequestSecret', error);
                 reject();
             } else {
-                console.log('(get-request-secret) The solution is: ', JSON.stringify(results[0]));
+                logger('social', 'getRequestSecret', results);
                 resolve(results[0]);
             }
         });
