@@ -73,7 +73,9 @@ router.route(twroute + '/timeline')
     .get(twitterCtrl.getTimeline);
 router.route(twroute)
     .post(twitterCtrl.post);
-
+router.route(twroute + '/retweet/:id')
+    .all(parseRouteId)
+    .post(twitterCtrl.retweet);
 
 
 

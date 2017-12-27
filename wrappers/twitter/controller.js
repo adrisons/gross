@@ -70,7 +70,7 @@ exports.getAccessToken = function (request, response) {
                     var columns = ['request_token', 'request_token_secret', 'access_token', 'access_token_secret', 'user_id', 'social_id', 'social_type_id', 'login'];
                     var values = [oauth_token, request_token_secret, accessToken, accessTokenSecret, user_id, data.id, socialType.id, data.screen_name];
                     socialCtrl.getParamsStr('UPDATE', columns, values, function (str) {
-                        console.log('Authentication successfull!');
+                        console.log('[' + new Date().toISOString() + '] Authentication successfull!');
                         socialService.add(columns, values, str).catch(function () {
                             // response.send({
                             //     "code": 403,
@@ -91,7 +91,7 @@ var verifyCredentials = function (accessToken, accessTokenSecret, callback) {
     };
     twitter.verifyCredentials(accessToken, accessTokenSecret, params, function (error, data, response) {
         if (error) {
-            // console.log('(verifyCredentials)' + error);
+            // console.log('['+new Date().toISOString()+'] (verifyCredentials)' + error);
             callback(null);
             //something was wrong with either accessToken or accessTokenSecret 
             //start over with Step 1 
@@ -105,7 +105,7 @@ var verifyCredentials = function (accessToken, accessTokenSecret, callback) {
 
 
 exports.getUserData = function (req, res) {
-    console.log('(twitter-get-user-data)');
+    console.log('[' + new Date().toISOString() + '] (twitter-get-user-data)');
     socialCtrl.getSocial(req, res);
 }
 
@@ -115,28 +115,32 @@ exports.getUserData = function (req, res) {
 
 exports.post = function (req, res) {
 
-    console.log('(twitter-post) body:' + JSON.stringify(req.body));
+    console.log('[' + new Date().toISOString() + '] (twitter-post) body:' + JSON.stringify(req.body));
     socialService.getAccessSecret(req.body.access_token, req.body.user_id).then(function (data) {
         var accessTokenSecret = data.access_token_secret;
         var accessToken = req.body.access_token;
-        console.log('accessToken=' + accessToken);
-        console.log('accessTokenSecret=' + accessTokenSecret);
-        twitter.statuses("update", {
-                status: req.body.message
-            },
+        var attachmentUrl = req.body.attachment_url;
+        var params = {status: req.body.message};
+        if (attachmentUrl) {
+            params.attachment_url= attachmentUrl;
+        }
+        console.log('[' + new Date().toISOString() + '] accessToken=' + accessToken);
+        console.log('[' + new Date().toISOString() + '] accessTokenSecret=' + accessTokenSecret);
+        console.log('[' + new Date().toISOString() + '] attachmentUrl=' + attachmentUrl);
+        twitter.statuses("update", params,
             accessToken,
             accessTokenSecret,
             function (error, data, response) {
                 if (error) {
                     // something went wrong
-                    console.log('(twitter-post) Error:' + JSON.stringify(error));
+                    console.log('[' + new Date().toISOString() + '] (twitter-post) Error:' + JSON.stringify(error));
                     res.send({
                         "code": 400,
                         "message": "Error posting",
                     });
                 } else {
                     // data contains the data sent by twitter
-                    console.log('(twitter-post) successful. data:' + JSON.stringify(data));
+                    console.log('[' + new Date().toISOString() + '] (twitter-post) successful. data:' + JSON.stringify(data));
                     res.send({
                         "code": 200,
                         "message": "Post successfully",
@@ -151,7 +155,7 @@ exports.post = function (req, res) {
 
 exports.getTimeline = function (req, res) {
 
-    console.log('(twitter-timeline) query:' + JSON.stringify(req.query));
+    console.log('[' + new Date().toISOString() + '] (twitter-timeline) query:' + JSON.stringify(req.query));
     socialService.getAccessSecret(req.query.access_token, req.query.user_id).then(function (data) {
         var accessTokenSecret = data.access_token_secret;
         var accessToken = req.query.access_token;
@@ -164,17 +168,54 @@ exports.getTimeline = function (req, res) {
             function (error, data, response) {
                 if (error) {
                     // something went wrong
-                    console.log('(twitter-timeline) Error:' + JSON.stringify(error));
+                    console.log('[' + new Date().toISOString() + '] (twitter-timeline) Error:' + JSON.stringify(error));
                     res.send({
                         "code": 400,
                         "message": "Error posting",
                     });
                 } else {
                     // data contains the data sent by twitter
-                    console.log('(twitter-timeline) successful. data:' + JSON.stringify(data));
+                    console.log('[' + new Date().toISOString() + '] (twitter-timeline) successful. data:' + JSON.stringify(data));
                     res.send({
                         "code": 200,
                         "message": "Post successfully",
+                        "data": data
+                    });
+                }
+            }
+        );
+    });
+}
+
+
+exports.retweet = function (req, res) {
+    console.log('[' + new Date().toISOString() + '] (twitter-retweet) body:' + JSON.stringify(req.body));
+    socialService.getAccessSecret(req.body.access_token, req.body.user_id).then(function (data) {
+        var msg_id = req.id;
+        var accessToken = req.body.access_token;
+        var accessTokenSecret = data.access_token_secret;
+        console.log('[' + new Date().toISOString() + '] msg_id=' + msg_id);
+        console.log('[' + new Date().toISOString() + '] accessToken=' + accessToken);
+        console.log('[' + new Date().toISOString() + '] accessTokenSecret=' + accessTokenSecret);
+        twitter.statuses("retweet", {
+                id: msg_id
+            },
+            accessToken,
+            accessTokenSecret,
+            function (error, data, response) {
+                if (error) {
+                    // something went wrong
+                    console.log('[' + new Date().toISOString() + '] (twitter-retweet) Error:' + JSON.stringify(error));
+                    res.send({
+                        "code": 400,
+                        "message": "Error retweeting",
+                    });
+                } else {
+                    // data contains the data sent by twitter
+                    console.log('[' + new Date().toISOString() + '] (twitter-retweet) successful. data:' + JSON.stringify(data));
+                    res.send({
+                        "code": 200,
+                        "message": "retweet successfully",
                         "data": data
                     });
                 }
