@@ -128,17 +128,21 @@ exports.getUserData = function (req, res) {
 // ===========
 
 exports.post = function (req, res) {
-
-    console.log('[' + new Date().toISOString() + '] (twitter-post) body:' + JSON.stringify(req.body));
+    logger('twitter', 'post', req.body);
     socialService.getAccessSecret(req.body.access_token, req.body.user_id).then(function (data) {
         var accessTokenSecret = data.access_token_secret;
         var accessToken = req.body.access_token;
         var attachmentUrl = req.body.attachment_url;
+        var replyId = req.body.in_reply_to_status_id;
         var params = {
             status: req.body.message
         };
         if (attachmentUrl) {
             params.attachment_url = attachmentUrl;
+        }
+        if (replyId) {
+            params.in_reply_to_status_id = replyId;
+            params.auto_populate_reply_metadata = true;
         }
         logger('twitter', 'post', {
             accessToken: accessToken,
@@ -174,7 +178,7 @@ exports.post = function (req, res) {
 
 exports.getTimeline = function (req, res) {
 
-    console.log('[' + new Date().toISOString() + '] (twitter-timeline) query:' + JSON.stringify(req.query));
+    logger('twitter', 'getTimeline', req.query);
     socialService.getAccessSecret(req.query.access_token, req.query.user_id).then(function (data) {
         var accessTokenSecret = data.access_token_secret;
         var accessToken = req.query.access_token;
@@ -199,7 +203,7 @@ exports.getTimeline = function (req, res) {
                     });
                 } else {
                     // data contains the data sent by twitter
-                    logger('twitter', 'getTimeline', data);
+                    logger('twitter', 'getTimeline', data.slice(0, 2));
 
                     res.send({
                         "code": 200,
@@ -214,7 +218,7 @@ exports.getTimeline = function (req, res) {
 
 
 exports.retweet = function (req, res) {
-    console.log('[' + new Date().toISOString() + '] (twitter-retweet) body:' + JSON.stringify(req.body));
+    logger('twitter', 'retweet', req.body);
     socialService.getAccessSecret(req.body.access_token, req.body.user_id).then(function (data) {
         var msg_id = req.id;
         var accessToken = req.body.access_token;
