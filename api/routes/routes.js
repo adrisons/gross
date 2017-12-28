@@ -76,8 +76,12 @@ router.route(twroute)
 router.route(twroute + '/retweet/:id')
     .all(parseRouteId)
     .post(twitterCtrl.retweet);
-
-
+router.route(twroute + '/like/:id')
+    .all(parseRouteId)
+    .post(twitterCtrl.like);
+router.route(twroute + '/unlike/:id')
+    .all(parseRouteId)
+    .post(twitterCtrl.unlike);
 
 // router.route(api + '/:name')
 //     .all(parseRouteName)

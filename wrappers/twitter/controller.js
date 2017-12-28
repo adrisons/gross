@@ -237,10 +237,11 @@ exports.retweet = function (req, res) {
             function (error, data, response) {
                 if (error) {
                     // something went wrong
-                    logger('twitter', 'retweet', error);
+                    logger('twitter', 'retweet', JSON.parse(error.data).errors[0].message);
+                    
                     res.send({
                         "code": 400,
-                        "message": "Error retweeting",
+                        "message": JSON.parse(error.data).errors[0].message
                     });
                 } else {
                     // data contains the data sent by twitter
@@ -249,6 +250,90 @@ exports.retweet = function (req, res) {
                     res.send({
                         "code": 200,
                         "message": "retweet successfully",
+                        "data": data
+                    });
+                }
+            }
+        );
+    });
+}
+
+
+
+exports.like = function (req, res) {
+    logger('twitter', 'like', req.body);
+    socialService.getAccessSecret(req.body.access_token, req.body.user_id).then(function (data) {
+        var msg_id = req.id;
+        var accessToken = req.body.access_token;
+        var accessTokenSecret = data.access_token_secret;
+        logger('twitter', 'like', {
+            msg_id: msg_id,
+            accessToken: accessToken,
+            accessTokenSecret: accessTokenSecret
+        });
+
+        twitter.favorites("create", {
+                id: msg_id
+            },
+            accessToken,
+            accessTokenSecret,
+            function (error, data, response) {
+                if (error) {
+                    // something went wrong
+                    logger('twitter', 'like', error);
+                    res.send({
+                        "code": 400,
+                        "message": error.data.errors[0].message,
+                    });
+                } else {
+                    // data contains the data sent by twitter
+                    logger('twitter', 'like', data);
+
+                    res.send({
+                        "code": 200,
+                        "message": "like successfully",
+                        "data": data
+                    });
+                }
+            }
+        );
+    });
+}
+
+
+
+exports.unlike = function (req, res) {
+    logger('twitter', 'unlike', req.body);
+    socialService.getAccessSecret(req.body.access_token, req.body.user_id).then(function (data) {
+        var msg_id = req.id;
+        var accessToken = req.body.access_token;
+        var accessTokenSecret = data.access_token_secret;
+        logger('twitter', 'unlike', {
+            msg_id: msg_id,
+            accessToken: accessToken,
+            accessTokenSecret: accessTokenSecret
+        });
+
+        twitter.favorites("destroy", {
+                id: msg_id
+            },
+            accessToken,
+            accessTokenSecret,
+            function (error, data, response) {
+                if (error) {
+                    // something went wrong
+                    logger('twitter', 'unlike', error);
+                    res.send({
+                        "code": 400,
+                        "message": error.data.errors[0].message
+                    });
+                } else {
+                    // data contains the data sent by twitter
+                    logger('twitter', 'unlike', data);
+
+                    res.send({
+                        "code": 200,
+                        "message": "unlike successfully",
                         "data": data
                     });
                 }
