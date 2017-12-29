@@ -186,11 +186,14 @@ exports.getTimeline = function (req, res) {
             accessToken: accessToken,
             accessTokenSecret: accessTokenSecret
         });
-
-        twitter.getTimeline("home", {
-                count: 25,
-                include_entities: true
-            },
+        var params = {
+            count: 25,
+            include_entities: true
+        };
+        if (req.query.max_id) {
+            params.max_id = req.query.max_id;
+        }
+        twitter.getTimeline("home", params,
             accessToken,
             accessTokenSecret,
             function (error, data, response) {
@@ -199,7 +202,7 @@ exports.getTimeline = function (req, res) {
                     logger('twitter', 'getTimeline', error);
                     res.send({
                         "code": 400,
-                        "message": "Error posting",
+                        "message": "Error getting timeline",
                     });
                 } else {
                     // data contains the data sent by twitter
@@ -207,7 +210,7 @@ exports.getTimeline = function (req, res) {
 
                     res.send({
                         "code": 200,
-                        "message": "Post successfully",
+                        "message": "Get timeline successfully",
                         "data": data
                     });
                 }
@@ -238,7 +241,7 @@ exports.retweet = function (req, res) {
                 if (error) {
                     // something went wrong
                     logger('twitter', 'retweet', JSON.parse(error.data).errors[0].message);
-                    
+
                     res.send({
                         "code": 400,
                         "message": JSON.parse(error.data).errors[0].message
