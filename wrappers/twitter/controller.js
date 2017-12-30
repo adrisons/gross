@@ -123,55 +123,112 @@ exports.getUserData = function (req, res) {
     socialCtrl.getSocial(req, res);
 }
 
+
 // ===========
 // API METHODS
 // ===========
+
+
+var uploadMedia = function (media, isBase64, accessToken, accessTokenSecret) {
+    return new Promise((resolve, reject) => {
+        logger('twitter', 'uploadMedia', {
+            isBase64: isBase64,
+            media: media,
+            accessToken: accessToken,
+            accessTokenSecret: accessTokenSecret
+        });
+        var params = {
+            // Either the raw binary content of the image, the binary base64 encoded (see isBase64 below) or the path to the file containing the image.
+            media: media,
+            // Set to true, if media contains base64 encoded data 
+            isBase64: isBase64
+        }
+
+        twitter.uploadMedia(params,
+            accessToken,
+            accessTokenSecret,
+
+            function (error, data, response) {
+                if (error) {
+                    // something went wrong
+                    logger('twitter', 'uploadMedia-error', error);
+                    reject(error);
+                } else {
+                    // data contains the data sent by twitter
+                    logger('twitter', 'uploadMedia-success', data);
+                    logger('twitter', 'uploadMedia-success', response);
+                    if (data.error) {
+                        reject(data.error);
+                    } else if (data.media_id_string) {
+                        resolve(data.media_id_string);
+                    }
+                }
+            }
+        );
+    });
+}
+
+
+var postPost = function (params, accessToken, accessTokenSecret, res) {
+    // Log
+    logger('twitter', 'postPost', params);
+    twitter.statuses("update", params,
+        accessToken,
+        accessTokenSecret,
+        function (error, data, response) {
+            if (error) {
+                // something went wrong
+                logger('twitter', 'postPost-error', error);
+
+                res.send({
+                    "code": 400,
+                    "message": JSON.parse(error.data).errors[0].message,
+                });
+            } else {
+                // data contains the data sent by twitter
+                logger('twitter', 'postPost-success', data);
+                res.send({
+                    "code": 200,
+                    "message": "Post successfully",
+                    "data": data.user.screen_name
+                });
+            }
+        }
+    );
+}
 
 exports.post = function (req, res) {
     logger('twitter', 'post', req.body);
     socialService.getAccessSecret(req.body.access_token, req.body.user_id).then(function (data) {
         var accessTokenSecret = data.access_token_secret;
         var accessToken = req.body.access_token;
-        var attachmentUrl = req.body.attachment_url;
+        var media = req.body.media;
+        var isBase64 = req.body.isBase64;
         var replyId = req.body.in_reply_to_status_id;
         var params = {
             status: req.body.message
         };
-        if (attachmentUrl) {
-            params.attachment_url = attachmentUrl;
-        }
+        // Reply
         if (replyId) {
             params.in_reply_to_status_id = replyId;
             params.auto_populate_reply_metadata = true;
         }
-        logger('twitter', 'post', {
-            accessToken: accessToken,
-            accessTokenSecret: accessTokenSecret,
-            params: params
-        });
-
-        twitter.statuses("update", params,
-            accessToken,
-            accessTokenSecret,
-            function (error, data, response) {
-                if (error) {
-                    // something went wrong
-                    logger('twitter', 'post', error);
+        // Media
+        if (media) {
+            uploadMedia(media, isBase64, accessToken, accessTokenSecret).then(function (id) {
+                    params.media_ids = [id].join(','); // only one for now
+                    postPost(params, accessToken, accessTokenSecret, res);
+                })
+                .catch(function (err) {
                     res.send({
                         "code": 400,
-                        "message": "Error posting",
+                        "message": err,
                     });
-                } else {
-                    // data contains the data sent by twitter
-                    logger('twitter', 'post', data);
-                    res.send({
-                        "code": 200,
-                        "message": "Post successfully",
-                        "data": data.user.screen_name
-                    });
-                }
-            }
-        );
+                });
+        } else {
+            postPost(params, accessToken, accessTokenSecret, res);
+        }
+
     });
 }
 
